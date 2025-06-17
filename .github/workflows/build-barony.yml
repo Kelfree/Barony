@@ -44,17 +44,23 @@ jobs:
             ${{ runner.os }}-cmake-build-
 
       - name: ⚙️ Configure with CMake
+        shell: pwsh
         run: |
-          cmake -B build -S . -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}\vcpkg\scripts\buildsystems\vcpkg.cmake `
-            -DVCPKG_TARGET_TRIPLET=x64-windows `
-            -DCMAKE_BUILD_TYPE=Release `
-            -DMODDING=ON -DDEBUGSCRIPTING=ON -DEDITOR=ON `
+          cmake -B build -S . `
+            -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}\vcpkg\scripts\buildsystems\vcpkg.cmake" `
+            -DVCPKG_TARGET_TRIPLET="x64-windows" `
+            -DCMAKE_BUILD_TYPE="Release" `
+            -DMODDING=ON `
+            -DDEBUGSCRIPTING=ON `
+            -DEDITOR=ON `
             -DFMOD=OFF
 
       - name: 🧱 Build with MSBuild
+        shell: pwsh
         run: cmake --build build --config Release
 
       - name: 📦 Archive build output
+        shell: pwsh
         run: Compress-Archive -Path build\Release\*.exe -DestinationPath barony_build.zip
 
       - name: 📤 Upload artifact
