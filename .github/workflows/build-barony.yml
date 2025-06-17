@@ -29,11 +29,15 @@ jobs:
             sdl2-net `
             sdl2-ttf `
             physfs `
-            zlib --triplet x64-windows
+            zlib `
+            rapidjson --triplet x64-windows
 
       - name: ⚙️ Configure with CMake
         run: |
-          cmake -B build -S . -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}\vcpkg\scripts\buildsystems\vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows -DCMAKE_BUILD_TYPE=Release -DMODDING=ON -DDEBUGSCRIPTING=ON -DEDITOR=ON
+          cmake -B build -S . -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}\vcpkg\scripts\buildsystems\vcpkg.cmake `
+            -DVCPKG_TARGET_TRIPLET=x64-windows `
+            -DCMAKE_BUILD_TYPE=Release `
+            -DMODDING=ON -DDEBUGSCRIPTING=ON -DEDITOR=ON
 
       - name: 🧱 Build with MSBuild
         run: cmake --build build --config Release
