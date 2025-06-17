@@ -18,8 +18,6 @@ jobs:
       - name: 📥 Checkout repository
         uses: actions/checkout@v3
 
-      # ──────────────────────────────────────────────────
-      # 🗂️ Кешируем папку с установленными пакетами vcpkg
       - name: 🔄 Cache vcpkg installed
         uses: actions/cache@v3
         with:
@@ -29,15 +27,14 @@ jobs:
             ${{ runner.os }}-vcpkg-
 
       - name: 📦 Install vcpkg and SDL2 + other deps
+        shell: pwsh
         run: |
-          if not exist vcpkg\bootstrap-vcpkg.bat (
+          if (-not (Test-Path vcpkg\bootstrap-vcpkg.bat)) {
             git clone https://github.com/microsoft/vcpkg.git
-            .\vcpkg\bootstrap-vcpkg.bat
-          )
-          .\vcpkg\vcpkg install sdl2 sdl2-image sdl2-mixer sdl2-net sdl2-ttf physfs zlib rapidjson --triplet x64-windows
+            & .\vcpkg\bootstrap-vcpkg.bat
+          }
+          & .\vcpkg\vcpkg install sdl2 sdl2-image sdl2-mixer sdl2-net sdl2-ttf physfs zlib rapidjson --triplet x64-windows
 
-      # ──────────────────────────────────────────────────
-      # 🗂️ Кешируем CMake build output для ускорения пересборок
       - name: 🔄 Cache CMake build folder
         uses: actions/cache@v3
         with:
