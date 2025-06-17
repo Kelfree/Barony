@@ -14,6 +14,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
       - name: Cache vcpkg builds
         uses: actions/cache@v3
@@ -21,11 +23,15 @@ jobs:
           path: |
             vcpkg/installed
             vcpkg/packages
-          key: ${{ runner.os }}-vcpkg-${{ hashFiles('**/vcpkg.json') }}
+          key: ${{ runner.os }}-vcpkg-${{ hashFiles('**/vcpkg.json') }},${{ hashFiles('**/.gitmodules') }}
+
+      - name: Initialize and update vcpkg submodule
+        run: |
+          git submodule update --init --recursive vcpkg
 
       - name: Bootstrap vcpkg
-        working-directory: ./vcpkg
-        run: .\\bootstrap-vcpkg.bat
+        run: |
+          .\\vcpkg\\bootstrap-vcpkg.bat
 
       - name: Install dependencies via vcpkg
         run: |
