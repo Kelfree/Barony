@@ -1,0 +1,36 @@
+name: Build Barony Editor
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: 📥 Checkout repo
+      uses: actions/checkout@v3
+
+    - name: 📦 Install vcpkg dependencies
+      run: |
+        git clone https://github.com/microsoft/vcpkg.git
+        .\vcpkg\bootstrap-vcpkg.bat
+        .\vcpkg\vcpkg install sdl2 sdl2-image sdl2-mixer sdl2-net
+
+    - name: ⚙️ Configure with CMake
+      run: |
+        cmake -B build -S . -DCMAKE_TOOLCHAIN_FILE=./vcpkg/scripts/buildsystems/vcpkg.cmake -DMODDING=ON -DDEBUGSCRIPTING=ON -DEDITOR=ON
+
+    - name: 🧱 Build with MSBuild
+      run: |
+        cmake --build build --config Release
+
+    - name: 📦 Archive build output
+      run: |
+        Compress-Archive -Path build\Release\*.exe -DestinationPath barony_build.zip
+
+    - name: 📤 Upload artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: barony_build
+        path: barony_build.zip
