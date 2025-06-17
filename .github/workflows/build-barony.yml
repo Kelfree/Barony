@@ -18,7 +18,6 @@ jobs:
       - name: 📥 Checkout repository
         uses: actions/checkout@v3
 
-      # ─────────────────────────────────────────────────────────────
       - name: 🔄 Cache vcpkg installed
         uses: actions/cache@v3
         with:
@@ -31,12 +30,11 @@ jobs:
         shell: pwsh
         run: |
           if (-not (Test-Path vcpkg\bootstrap-vcpkg.bat)) {
-            git clone https://github.com/microsoft/vcpkg.git
+            git clone https://github.com/microsoft/vcpkg.git vcpkg
             & .\vcpkg\bootstrap-vcpkg.bat
           }
           & .\vcpkg\vcpkg install sdl2 sdl2-image sdl2-mixer sdl2-net sdl2-ttf physfs zlib rapidjson --triplet x64-windows
 
-      # ─────────────────────────────────────────────────────────────
       - name: 🔄 Cache CMake build folder
         uses: actions/cache@v3
         with:
@@ -48,14 +46,7 @@ jobs:
       - name: ⚙️ Configure with CMake
         shell: pwsh
         run: |
-          cmake -B build -S . \
-            -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}\vcpkg\scripts\buildsystems\vcpkg.cmake" \
-            -DVCPKG_TARGET_TRIPLET="x64-windows" \
-            -DCMAKE_BUILD_TYPE="Release" \
-            -DMODDING=ON \
-            -DDEBUGSCRIPTING=ON \
-            -DEDITOR=ON \
-            -DFMOD=OFF
+          cmake -B build -S . -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}\vcpkg\scripts\buildsystems\vcpkg.cmake" -DVCPKG_TARGET_TRIPLET="x64-windows" -DCMAKE_BUILD_TYPE="Release" -DMODDING=ON -DDEBUGSCRIPTING=ON -DEDITOR=ON -DFMOD=OFF
 
       - name: 🧱 Build with MSBuild
         shell: pwsh
