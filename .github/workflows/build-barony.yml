@@ -3,15 +3,23 @@ name: Build Barony Editor
 on:
   workflow_dispatch:
 
+# 👇 Обязательные права для actions/upload-artifact@v4
+permissions:
+  contents: read
+  actions: read
+  id-token: write
+  packages: write
+  checks: write
+
 jobs:
   build:
     runs-on: windows-latest
 
     steps:
-    - name: 📥 Checkout repo
-      uses: actions/upload-artifact@v4
+    - name: 📥 Checkout repository
+      uses: actions/checkout@v3
 
-    - name: 📦 Install vcpkg dependencies
+    - name: 🛠️ Set up vcpkg
       run: |
         git clone https://github.com/microsoft/vcpkg.git
         .\vcpkg\bootstrap-vcpkg.bat
@@ -19,7 +27,7 @@ jobs:
 
     - name: ⚙️ Configure with CMake
       run: |
-        cmake -B build -S . -DCMAKE_TOOLCHAIN_FILE=./vcpkg/scripts/buildsystems/vcpkg.cmake -DMODDING=ON -DDEBUGSCRIPTING=ON -DEDITOR=ON
+        cmake -B build -S . -DCMAKE_TOOLCHAIN_FILE=./vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_BUILD_TYPE=Release -DMODDING=ON -DDEBUGSCRIPTING=ON -DEDITOR=ON
 
     - name: 🧱 Build with MSBuild
       run: |
@@ -30,7 +38,7 @@ jobs:
         Compress-Archive -Path build\Release\*.exe -DestinationPath barony_build.zip
 
     - name: 📤 Upload artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: barony_build
         path: barony_build.zip
