@@ -3,7 +3,6 @@ name: Build Barony Editor
 on:
   workflow_dispatch:
 
-# 👇 Обязательные права для actions/upload-artifact@v4
 permissions:
   contents: read
   actions: read
@@ -19,15 +18,19 @@ jobs:
     - name: 📥 Checkout repository
       uses: actions/checkout@v3
 
-    - name: 🛠️ Set up vcpkg
+    - name: 📦 Install vcpkg + dependencies
       run: |
         git clone https://github.com/microsoft/vcpkg.git
         .\vcpkg\bootstrap-vcpkg.bat
         .\vcpkg\vcpkg install sdl2 sdl2-image sdl2-mixer sdl2-net
 
-    - name: ⚙️ Configure with CMake
+    - name: ⚙️ Configure with CMake (with SDL paths)
       run: |
-        cmake -B build -S . -DCMAKE_TOOLCHAIN_FILE=./vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_BUILD_TYPE=Release -DMODDING=ON -DDEBUGSCRIPTING=ON -DEDITOR=ON
+        cmake -B build -S . ^
+          -DCMAKE_BUILD_TYPE=Release ^
+          -DMODDING=ON -DDEBUGSCRIPTING=ON -DEDITOR=ON ^
+          -DSDL2_INCLUDE_DIR=./vcpkg/installed/x64-windows/include ^
+          -DSDL2_LIBRARY=./vcpkg/installed/x64-windows/lib/SDL2.lib
 
     - name: 🧱 Build with MSBuild
       run: |
