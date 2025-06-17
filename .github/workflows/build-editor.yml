@@ -5,6 +5,7 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+  workflow_dispatch:
 
 jobs:
   build-windows-editor:
@@ -24,11 +25,11 @@ jobs:
 
       - name: Bootstrap vcpkg
         working-directory: ./vcpkg
-        run: .\bootstrap-vcpkg.bat
+        run: .\\bootstrap-vcpkg.bat
 
       - name: Install dependencies via vcpkg
         run: |
-          .\vcpkg\vcpkg.exe install \
+          .\\vcpkg\\vcpkg.exe install \
             sdl2 sdl2-image sdl2-net sdl2-ttf physfs zlib rapidjson imgui
 
       - name: Configure CMake
