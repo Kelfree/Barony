@@ -37,7 +37,7 @@ jobs:
         run: cmake --build build --target editor --config Release
 
       - name: 📤 Upload Editor.exe
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: barony-editor
           path: build\Release\editor.exe
