@@ -1,0 +1,55 @@
+name: Build Editor
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-windows-editor:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Cache vcpkg builds
+        uses: actions/cache@v3
+        with:
+          path: |
+            vcpkg/installed
+            vcpkg/packages
+          key: ${{ runner.os }}-vcpkg-${{ hashFiles('**/vcpkg.json') }}
+
+      - name: Bootstrap vcpkg
+        working-directory: ./vcpkg
+        run: .\bootstrap-vcpkg.bat
+
+      - name: Install dependencies via vcpkg
+        run: |
+          .\vcpkg\vcpkg.exe install \
+            sdl2 sdl2-image sdl2-net sdl2-ttf physfs zlib rapidjson imgui
+
+      - name: Configure CMake
+        run: |
+          cmake -B build -S . \
+            -DCMAKE_TOOLCHAIN_FILE=./vcpkg/scripts/buildsystems/vcpkg.cmake \
+            -DVCPKG_TARGET_TRIPLET=x64-windows \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DEDITOR=ON \
+            -DMODDING=ON \
+            -DDEBUGSCRIPTING=ON \
+            -DBUILD_GAME=OFF \
+            -DBUILD_TESTS=OFF \
+            -DBUILD_LAUNCHER=OFF \
+            -DFMOD=OFF
+
+      - name: Build editor.exe
+        run: cmake --build build --config Release --target editor
+
+      - name: Upload editor.exe artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: editor-exe
+          path: build\\Release\\editor.exe
