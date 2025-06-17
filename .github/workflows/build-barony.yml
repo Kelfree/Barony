@@ -18,23 +18,18 @@ jobs:
     - name: 📥 Checkout repository
       uses: actions/checkout@v3
 
-    - name: 📦 Install vcpkg + dependencies
+    - name: 📦 Install vcpkg and dependencies
       run: |
         git clone https://github.com/microsoft/vcpkg.git
         .\vcpkg\bootstrap-vcpkg.bat
-        .\vcpkg\vcpkg install sdl2 sdl2-image sdl2-mixer sdl2-net
+        .\vcpkg\vcpkg install sdl2 sdl2-image sdl2-mixer sdl2-net --triplet x64-windows
 
-    - name: ⚙️ Configure with CMake (with SDL paths)
+    - name: ⚙️ Configure with CMake
       run: |
-        cmake -B build -S . ^
-          -DCMAKE_BUILD_TYPE=Release ^
-          -DMODDING=ON -DDEBUGSCRIPTING=ON -DEDITOR=ON ^
-          -DSDL2_INCLUDE_DIR=./vcpkg/installed/x64-windows/include ^
-          -DSDL2_LIBRARY=./vcpkg/installed/x64-windows/lib/SDL2.lib
+        cmake -B build -S . -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}\vcpkg\scripts\buildsystems\vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows -DCMAKE_BUILD_TYPE=Release -DMODDING=ON -DDEBUGSCRIPTING=ON -DEDITOR=ON
 
     - name: 🧱 Build with MSBuild
-      run: |
-        cmake --build build --config Release
+      run: cmake --build build --config Release
 
     - name: 📦 Archive build output
       run: |
