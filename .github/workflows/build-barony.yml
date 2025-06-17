@@ -15,28 +15,32 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - name: 📥 Checkout repository
-      uses: actions/checkout@v3
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v3
 
-    - name: 📦 Install vcpkg and dependencies
-      run: |
-        git clone https://github.com/microsoft/vcpkg.git
-        .\vcpkg\bootstrap-vcpkg.bat
-        .\vcpkg\vcpkg install sdl2 sdl2-image sdl2-mixer sdl2-net --triplet x64-windows
+      - name: 📦 Install vcpkg and SDL2 dependencies
+        run: |
+          git clone https://github.com/microsoft/vcpkg.git
+          .\vcpkg\bootstrap-vcpkg.bat
+          .\vcpkg\vcpkg install sdl2 sdl2-image sdl2-mixer sdl2-net sdl2-ttf --triplet x64-windows
 
-    - name: ⚙️ Configure with CMake
-      run: |
-        cmake -B build -S . -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}\vcpkg\scripts\buildsystems\vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows -DCMAKE_BUILD_TYPE=Release -DMODDING=ON -DDEBUGSCRIPTING=ON -DEDITOR=ON
+      - name: ⚙️ Configure with CMake
+        run: |
+          cmake -B build -S . `
+            -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}\vcpkg\scripts\buildsystems\vcpkg.cmake `
+            -DVCPKG_TARGET_TRIPLET=x64-windows `
+            -DCMAKE_BUILD_TYPE=Release `
+            -DMODDING=ON -DDEBUGSCRIPTING=ON -DEDITOR=ON
 
-    - name: 🧱 Build with MSBuild
-      run: cmake --build build --config Release
+      - name: 🧱 Build with MSBuild
+        run: cmake --build build --config Release
 
-    - name: 📦 Archive build output
-      run: |
-        Compress-Archive -Path build\Release\*.exe -DestinationPath barony_build.zip
+      - name: 📦 Archive build output
+        run: |
+          Compress-Archive -Path build\Release\*.exe -DestinationPath barony_build.zip
 
-    - name: 📤 Upload artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: barony_build
-        path: barony_build.zip
+      - name: 📤 Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: barony_build
+          path: barony_build.zip
